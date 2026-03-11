@@ -16,8 +16,13 @@ const Signup = ({ onSignup, switchToLogin }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [generatedCode, setGeneratedCode] = useState('');
+const [generatedCode, setGeneratedCode] = useState('');
   const formRef = useRef();
+
+  // Use different API URL based on environment
+  const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3001/api' 
+    : '/api';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,10 +37,10 @@ const Signup = ({ onSignup, switchToLogin }) => {
     return Math.floor(100000 + Math.random() * 900000).toString();
   };
 
-  const sendVerificationEmail = async (email, code, name) => {
+const sendVerificationEmail = async (email, code, name) => {
     try {
       // Call our own backend server
-      const response = await fetch('http://localhost:3001/api/send-verification', {
+      const response = await fetch(`${API_URL}/send-verification`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,9 +91,9 @@ const Signup = ({ onSignup, switchToLogin }) => {
       return;
     }
 
-    // Check MongoDB for existing user
+// Check MongoDB for existing user
     try {
-      const checkResponse = await fetch('http://localhost:3001/api/check-user', {
+      const checkResponse = await fetch(`${API_URL}/check-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email }),
@@ -140,7 +145,7 @@ const Signup = ({ onSignup, switchToLogin }) => {
     if (verificationCode === generatedCode) {
       // Save to MongoDB only
       try {
-        const response = await fetch('http://localhost:3001/api/register-user', {
+const response = await fetch(`${API_URL}/register-user`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
