@@ -131,6 +131,23 @@ app.post('/api/register-user', async (req, res) => {
   }
 });
 
+// Check if user exists
+app.post('/api/check-user', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ exists: false, message: 'Email is required' });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email });
+    res.json({ exists: !!existingUser });
+  } catch (error) {
+    console.error('Check user error:', error);
+    res.json({ exists: false });
+  }
+});
+
 // Admin endpoint to get all users (protected)
 app.get('/api/admin/users', async (req, res) => {
   try {

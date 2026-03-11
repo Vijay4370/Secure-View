@@ -86,11 +86,21 @@ const Signup = ({ onSignup, switchToLogin }) => {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('cctv-users') || '[]');
-    if (users.find(u => u.email === formData.email)) {
-      setError('An account with this email already exists');
-      setIsLoading(false);
-      return;
+    // Check MongoDB for existing user
+    try {
+      const checkResponse = await fetch('http://localhost:3001/api/check-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email }),
+      });
+      const checkData = await checkResponse.json();
+      if (checkData.exists) {
+        setError('An account with this email already exists');
+        setIsLoading(false);
+        return;
+      }
+    } catch (err) {
+      console.log('Could not check MongoDB, continuing...');
     }
 
     const code = generateCode();
@@ -120,16 +130,6 @@ const Signup = ({ onSignup, switchToLogin }) => {
 
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Get IP address
-    let ipAddress = 'Unknown';
-    try {
-      const ipResponse = await fetch('https://api.ipify.org?format=json');
-      const ipData = await ipResponse.json();
-      ipAddress = ipData.ip;
-    } catch (err) {
-      console.log('Could not get IP address');
-    }
-
     // Get current date and time in India timezone (IST)
     const now = new Date();
     // Convert to India timezone (Asia/Kolkata = UTC+5:30)
@@ -138,7 +138,7 @@ const Signup = ({ onSignup, switchToLogin }) => {
     const dateTime = indiaTime.toISOString();
 
     if (verificationCode === generatedCode) {
-      // Save to MongoDB first
+      // Save to MongoDB only
       try {
         const response = await fetch('http://localhost:3001/api/register-user', {
           method: 'POST',
@@ -160,30 +160,13 @@ const Signup = ({ onSignup, switchToLogin }) => {
         console.log('MongoDB connection note:', mongoError.message);
       }
 
-      // Also save to localStorage for local functionality
-      const users = JSON.parse(localStorage.getItem('cctv-users') || '[]');
+      // Create user for session (only in memory, not saved to localStorage)
       const newUser = {
         id: Date.now(),
         name: formData.name,
         email: formData.email,
-        password: formData.password,
-        createdAt: dateTime,
-        ipAddress: ipAddress
+        createdAt: dateTime
       };
-      users.push(newUser);
-      localStorage.setItem('cctv-users', JSON.stringify(users));
-
-      // Export users to JSON file download
-      const jsonBlob = new Blob([JSON.stringify(users, null, 2)], { type: 'application/json' });
-      const jsonUrl = URL.createObjectURL(jsonBlob);
-      const link = document.createElement('a');
-      link.href = jsonUrl;
-      const today = new Date().toISOString().split('T')[0];
-      link.download = `cctv-users-${today}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(jsonUrl);
 
       setSuccess('Account created successfully!');
       setTimeout(() => {
