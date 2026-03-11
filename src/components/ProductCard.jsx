@@ -2,23 +2,13 @@ import { ShoppingCart, Eye, Star, CheckCircle, XCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const ProductCard = ({ product, onViewDetails }) => {
-  const { addToCart, toggleCart } = useCart();
+  const { addToCartWithPending } = useCart();
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
     
-    // Check if user is logged in
-    const currentUser = localStorage.getItem('cctv-current-user');
-    
-    if (!currentUser) {
-      // Dispatch custom event to open login panel
-      window.dispatchEvent(new CustomEvent('open-login-panel'));
-      return;
-    }
-    
     if (product.inStock) {
-      addToCart(product);
-      toggleCart();
+      addToCartWithPending(product);
     }
   };
 

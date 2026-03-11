@@ -16,10 +16,30 @@ export const CartProvider = ({ children }) => {
     return savedCart ? JSON.parse(savedCart) : [];
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
+  // Store product that should be added after login
+  const [pendingProduct, setPendingProduct] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('cctv-cart', JSON.stringify(cart));
   }, [cart]);
+
+  // Check for pending product when cart changes (login happened)
+  useEffect(() => {
+    const savedPending = localStorage.getItem('cctv-pending-product');
+    if (savedPending && cart.length === 0) {
+      // User just logged in and has pending product
+      try {
+        const pending = JSON.parse(savedPending);
+        if (pending) {
+          addToCart(pending);
+          localStorage.removeItem('cctv-pending-product');
+          setIsCartOpen(true);
+        }
+      } catch (e) {
+        console.error('Error parsing pending product:', e);
+      }
+    }
+  }, []);
 
   const addToCart = (product) => {
     setCart((prevCart) => {
@@ -31,6 +51,25 @@ export const CartProvider = ({ children }) => {
       }
       return [...prevCart, { ...product, quantity: 1 }];
     });
+  };
+
+  // Add product and store in localStorage for persistence
+  const addToCartWithPending = (product) => {
+    // Check if user is logged in
+    const currentUser = localStorage.getItem('cctv-current-user');
+    
+    if (!currentUser) {
+      // Store pending product
+      localStorage.setItem('cctv-pending-product', JSON.stringify(product));
+      setPendingProduct(product);
+      // Dispatch event to open login panel
+      window.dispatchEvent(new CustomEvent('open-login-panel'));
+      return false; // Not added yet
+    }
+    
+    // User is logged in, add directly
+    addToCart(product);
+    return true; // Added successfully
   };
 
   const removeFromCart = (productId) => {
@@ -74,6 +113,7 @@ export const CartProvider = ({ children }) => {
       value={{
         cart,
         addToCart,
+        addToCartWithPending,
         removeFromCart,
         updateQuantity,
         clearCart,
@@ -82,6 +122,7 @@ export const CartProvider = ({ children }) => {
         isCartOpen,
         toggleCart,
         closeCart,
+        pendingProduct,
       }}
     >
       {children}

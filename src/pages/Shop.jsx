@@ -5,7 +5,7 @@ import { products } from '../data/mockData';
 import { useCart } from '../context/CartContext';
 
 const Shop = ({ setCurrentPage, handleCheckout }) => {
-  const { addToCart, toggleCart } = useCart();
+  const { addToCartWithPending } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
@@ -299,18 +299,7 @@ const Shop = ({ setCurrentPage, handleCheckout }) => {
 
                 <button 
                   onClick={() => {
-                    // Check if user is logged in
-                    const currentUser = localStorage.getItem('cctv-current-user');
-                    
-                    if (!currentUser) {
-                      // Dispatch custom event to open login panel
-                      window.dispatchEvent(new CustomEvent('open-login-panel'));
-                      setSelectedProduct(null);
-                      return;
-                    }
-                    
-                    addToCart(selectedProduct);
-                    toggleCart();
+                    addToCartWithPending(selectedProduct);
                     setSelectedProduct(null);
                   }}
                   className="mt-3 py-3 px-4 gap-4 bg-accent text-background font-inter font-semibold rounded-xl hover:bg-amber-400 transition-colors btn-glow w-full"
@@ -319,17 +308,7 @@ const Shop = ({ setCurrentPage, handleCheckout }) => {
                 </button>
                 <button 
                   onClick={() => {
-                    // Check if user is logged in
-                    const currentUser = localStorage.getItem('cctv-current-user');
-                    
-                    if (!currentUser) {
-                      // Dispatch custom event to open login panel
-                      window.dispatchEvent(new CustomEvent('open-login-panel'));
-                      setSelectedProduct(null);
-                      return;
-                    }
-                    
-                    addToCart(selectedProduct);
+                    addToCartWithPending(selectedProduct);
                     setSelectedProduct(null);
                     handleCheckout();
                   }}
