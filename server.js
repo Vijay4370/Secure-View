@@ -20,8 +20,8 @@ const createTransporter = () => {
   return nodemailer.createTransport({
     service: 'gmail', // or 'outlook', 'yahoo'
     auth: {
-      user: 'vrajput7024@gmail.com', // Replace with your email
-      pass: 'tbji xggz sonw pslb' // Replace with your app password
+      user: 'vrajput4370@gmail.com', // Replace with your email
+      pass: 'jxvpzgncykilblod' // Replace with your app password (no spaces)
     }
   });
 };
@@ -38,7 +38,7 @@ app.post('/api/send-verification', async (req, res) => {
     const transporter = createTransporter();
 
     const mailOptions = {
-      from: '"SecureView CCTV Shop" <your-email@gmail.com>',
+      from: '"SecureView CCTV Shop" <vrajput4370@gmail.com>',
       to: email,
       subject: 'Email Verification - SecureView CCTV Shop',
       html: `
