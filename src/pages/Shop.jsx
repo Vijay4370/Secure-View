@@ -5,7 +5,7 @@ import { products } from '../data/mockData';
 import { useCart } from '../context/CartContext';
 
 const Shop = ({ setCurrentPage, handleCheckout }) => {
-  const { addToCart } = useCart();
+  const { addToCart, toggleCart } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedBrand, setSelectedBrand] = useState('all');
@@ -310,6 +310,7 @@ const Shop = ({ setCurrentPage, handleCheckout }) => {
                     }
                     
                     addToCart(selectedProduct);
+                    toggleCart();
                     setSelectedProduct(null);
                   }}
                   className="mt-3 py-3 px-4 gap-4 bg-accent text-background font-inter font-semibold rounded-xl hover:bg-amber-400 transition-colors btn-glow w-full"

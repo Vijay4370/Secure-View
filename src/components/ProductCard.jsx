@@ -2,7 +2,7 @@ import { ShoppingCart, Eye, Star, CheckCircle, XCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const ProductCard = ({ product, onViewDetails }) => {
-  const { addToCart } = useCart();
+  const { addToCart, toggleCart } = useCart();
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
@@ -18,6 +18,7 @@ const ProductCard = ({ product, onViewDetails }) => {
     
     if (product.inStock) {
       addToCart(product);
+      toggleCart();
     }
   };
 
