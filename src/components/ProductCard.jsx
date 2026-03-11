@@ -6,6 +6,16 @@ const ProductCard = ({ product, onViewDetails }) => {
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
+    
+    // Check if user is logged in
+    const currentUser = localStorage.getItem('cctv-current-user');
+    
+    if (!currentUser) {
+      // Dispatch custom event to open login panel
+      window.dispatchEvent(new CustomEvent('open-login-panel'));
+      return;
+    }
+    
     if (product.inStock) {
       addToCart(product);
     }

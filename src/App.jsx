@@ -39,6 +39,16 @@ function App() {
     }
   }, []);
 
+  // Listen for open-login-panel custom event
+  useEffect(() => {
+    const handleOpenLoginPanel = () => {
+      setShowLoginPanel(true);
+    };
+
+    window.addEventListener('open-login-panel', handleOpenLoginPanel);
+    return () => window.removeEventListener('open-login-panel', handleOpenLoginPanel);
+  }, []);
+
   const handlePageChange = (page) => {
     // If navigating to liveview from demo mode, set demo mode
     if (page === 'liveview' && isDemoMode) {

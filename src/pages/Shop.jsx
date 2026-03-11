@@ -299,6 +299,16 @@ const Shop = ({ setCurrentPage, handleCheckout }) => {
 
                 <button 
                   onClick={() => {
+                    // Check if user is logged in
+                    const currentUser = localStorage.getItem('cctv-current-user');
+                    
+                    if (!currentUser) {
+                      // Dispatch custom event to open login panel
+                      window.dispatchEvent(new CustomEvent('open-login-panel'));
+                      setSelectedProduct(null);
+                      return;
+                    }
+                    
                     addToCart(selectedProduct);
                     setSelectedProduct(null);
                   }}
@@ -308,6 +318,16 @@ const Shop = ({ setCurrentPage, handleCheckout }) => {
                 </button>
                 <button 
                   onClick={() => {
+                    // Check if user is logged in
+                    const currentUser = localStorage.getItem('cctv-current-user');
+                    
+                    if (!currentUser) {
+                      // Dispatch custom event to open login panel
+                      window.dispatchEvent(new CustomEvent('open-login-panel'));
+                      setSelectedProduct(null);
+                      return;
+                    }
+                    
                     addToCart(selectedProduct);
                     setSelectedProduct(null);
                     handleCheckout();
