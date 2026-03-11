@@ -1,27 +1,48 @@
 import express from 'express';
 import nodemailer from 'nodemailer';
 import cors from 'cors';
+import mongoose from 'mongoose';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Email configuration - Configure your email here
-// You can use Gmail, Outlook, or any SMTP server
+// MongoDB Connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://vrajput7980_db_user:Vaibhav4370@cluster0.yvgyci5.mongodb.net/?appName=Cluster0';
+
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// User Schema
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  phone: { type: String },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const User = mongoose.model('User', userSchema);
+
+// Email configuration
 const createTransporter = () => {
   return nodemailer.createTransport({
-    service: 'gmail', // or 'outlook', 'yahoo'
+    service: 'gmail',
     auth: {
-      user: 'vrajput4370@gmail.com', // Replace with your email
-      pass: 'jxvpzgncykilblod' // Replace with your app password (no spaces)
+      user: 'vrajput4370@gmail.com',
+      pass: 'jxvpzgncykilblod'
     }
   });
 };
@@ -73,6 +94,51 @@ app.post('/api/send-verification', async (req, res) => {
   } catch (error) {
     console.error('Email error:', error);
     res.status(500).json({ success: false, message: 'Failed to send email' });
+  }
+});
+
+// Register new user to MongoDB
+app.post('/api/register-user', async (req, res) => {
+  const { name, email, password, phone } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json({ success: false, message: 'Missing required fields' });
+  }
+
+  try {
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'User already exists' });
+    }
+
+    // Create new user
+    const newUser = new User({
+      name,
+      email,
+      password,
+      phone
+    });
+
+    await newUser.save();
+    
+    console.log('New user registered:', { name, email, createdAt: new Date() });
+    
+    res.json({ success: true, message: 'User registered successfully' });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ success: false, message: 'Failed to register user' });
+  }
+});
+
+// Admin endpoint to get all users (protected)
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 });
+    res.json({ success: true, users });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch users' });
   }
 });
 

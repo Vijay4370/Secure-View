@@ -138,6 +138,29 @@ const Signup = ({ onSignup, switchToLogin }) => {
     const dateTime = indiaTime.toISOString();
 
     if (verificationCode === generatedCode) {
+      // Save to MongoDB first
+      try {
+        const response = await fetch('http://localhost:3001/api/register-user', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password
+          }),
+        });
+        
+        const data = await response.json();
+        if (!data.success) {
+          console.log('MongoDB registration note:', data.message);
+        }
+      } catch (mongoError) {
+        console.log('MongoDB connection note:', mongoError.message);
+      }
+
+      // Also save to localStorage for local functionality
       const users = JSON.parse(localStorage.getItem('cctv-users') || '[]');
       const newUser = {
         id: Date.now(),
