@@ -96,6 +96,7 @@ const Signup = ({ onSignup, switchToLogin }) => {
     const code = generateCode();
     setGeneratedCode(code);
 
+    // Try to send email to user's email
     const emailSent = await sendVerificationEmail(formData.email, code, formData.name);
 
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -103,7 +104,8 @@ const Signup = ({ onSignup, switchToLogin }) => {
     if (emailSent) {
       setSuccess(`Verification code sent to ${formData.email}!`);
     } else {
-      setSuccess(`Please configure EmailJS. For demo, code is: ${code}`);
+      // Fallback: show code in success message
+      setSuccess(`Code: ${code} (Check your email or use this code)`);
     }
 
     setStep(2);
